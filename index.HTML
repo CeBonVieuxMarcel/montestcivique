@@ -130,7 +130,8 @@ function checkAnswer(index) {
     } else {
       document.getElementById('quiz').style.display = 'none';
       document.getElementById('progress').textContent = '';
-      document.getElementById('score').textContent = `Votre score : ${score} / ${questions.length}`;
+      const percentage = ((score/questions.length)*100).toFixed(1);
+      document.getElementById('score').innerHTML = `Votre score : ${score} / ${questions.length} <br>Pourcentage de réussite : ${percentage}%`;
     }
   },1000);
 }
