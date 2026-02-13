@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QCM Civique OFII - Mobile</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 10px; margin:0; }
+.quiz-container { max-width: 600px; margin: auto; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+h1 { text-align: center; font-size: 1.8em; }
+.progress { margin-bottom: 10px; font-weight: bold; font-size: 1em; text-align: center; }
+.question { font-size: 1.1em; margin-bottom: 15px; }
+.answers button { display: block; margin: 8px 0; padding: 15px; width: 100%; border: none; border-radius: 8px; background: #007BFF; color: #fff; cursor: pointer; font-size: 1em; text-align: left; }
+.answers button:hover { background: #0056b3; }
+.feedback { font-weight: bold; margin: 10px 0; font-size: 1em; text-align: center; }
+#score { font-size: 1.2em; text-align: center; margin-top: 15px; }
+</style>
+</head>
+<body>
+<div class="quiz-container">
+  <h1>QCM Civique OFII</h1>
+  <div class="progress" id="progress"></div>
+  <div id="quiz">
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+  <div id="score"></div>
+</div>
+
+<script>
+// Exemple de questions OFII, à compléter avec toutes les questions officielles
+const allQuestions = [
+  // Principes et valeurs de la République
+  {question:"À quoi correspond la date du 14 juillet ?", answers:["Fête nationale française","Début de la Révolution russe","Jour de la Constitution","Anniversaire du roi"], correct:0},
+  {question:"Quel est l’un des symboles de la République française ?", answers:["Marianne","Napoléon","Tour Eiffel","Le coq anglais"], correct:0},
+  {question:"Le principe d’égalité signifie que :", answers:["Même salaire pour tous","Même droits pour tous","Même métier pour tous","Même religion pour tous"], correct:1},
+  {question:"Liberté, égalité, fraternité, c’est :", answers:["La devise de la République française","Une devise ancienne","Un chant national","Un dicton populaire"], correct:0},
+  {question:"A-t-on le droit d'insulter publiquement quelqu’un parce qu’il est différent ?", answers:["Oui","Non","Parfois","Seulement à l'école"], correct:1},
+  {question:"Certains métiers peuvent-ils être réservés aux hommes ?", answers:["Oui","Non","Seulement dans les entreprises privées","Seulement dans la fonction publique"], correct:1},
+  {question:"De quand date la Constitution de la Ve République ?", answers:["1789","1848","1958","2000"], correct:2},
+  {question:"Le régime de la France est :", answers:["Monarchie","République","Empire","Dictature"], correct:1},
+  {question:"Lequel de ces symboles représente officiellement la République française ?", answers:["Marianne","Le lion","La Tour Eiffel","Napoléon"], correct:0},
+  {question:"Où peut-on voir la devise de la République ?", answers:["Sur les bâtiments publics","Dans les journaux uniquement","À l'école seulement","Sur les billets de banque uniquement"], correct:0},
+  {question:"Qu’est-ce que l’égalité ?", answers:["Même salaire","Même droits","Même religion","Même métier"], correct:1},
+  {question:"Que signifie la liberté ?", answers:["Pouvoir faire ce que l'on veut sans limite","Pouvoir agir dans le respect de la loi","Pouvoir ignorer les règles","Pouvoir imposer ses idées"], correct:1},
+  {question:"Que signifie le mot fraternité dans la devise française ?", answers:["Amour familial","Solidarité entre citoyens","Force militaire","Travail collectif obligatoire"], correct:1},
+  {question:"Quel animal est un symbole de la France ?", answers:["Le lion","Le coq","Le cheval","Le dauphin"], correct:1},
+  {question:"Quel est l’un des rôles des associations ?", answers:["Défendre des intérêts","Remplacer l’État","Gérer la police","Écrire des lois"], correct:0},
+  {question:"Quel est le nom de l'hymne national ?", answers:["La Marseillaise","Le Chant du départ","L’Internationale","La Parisienne"], correct:0},
+  {question:"Quel symbole de la République française est tricolore ?", answers:["Le drapeau","Marianne","La Tour Eiffel","Le coq"], correct:0},
+  {question:"Quelle est la date de la fête nationale française ?", answers:["14 juillet","1er mai","11 novembre","8 mai"], correct:0},
+  {question:"Quelle est la devise de la République française ?", answers:["Liberté, égalité, fraternité","Travail, famille, patrie","Honneur et Patrie","Union et Justice"], correct:0},
+  {question:"Quelle est la langue officielle de la République française ?", answers:["Français","Anglais","Latin","Arabe"], correct:0},
+  {question:"Quelle liberté permet à chacun d’exprimer ses idées ?", answers:["Liberté d’expression","Liberté de religion","Liberté de se taire","Liberté de vote"], correct:0},
+
+  // Système institutionnel et politique
+  {question:"Qui nomme le Premier ministre ?", answers:["Le Président de la République","L’Assemblée nationale","Le Sénat","Le peuple"], correct:0},
+  {question:"Le Parlement est composé :", answers:["Assemblée nationale et Sénat","Députés uniquement","Sénateurs uniquement","Président et Premier ministre"], correct:0},
+  {question:"Qui doit respecter la loi ?", answers:["Tout le monde","Seulement les citoyens","Seulement les élus","Seulement la police"], correct:0},
+  {question:"À partir de quel âge a-t-on le droit de voter ?", answers:["16 ans","18 ans","21 ans","20 ans"], correct:1},
+  {question:"Combien de députés composent l’Assemblée nationale ?", answers:["577","350","100","750"], correct:0},
+  {question:"Pour combien de temps est élu le président de la République française ?", answers:["5 ans","4 ans","6 ans","7 ans"], correct:0},
+  {question:"Qui possède le pouvoir exécutif ?", answers:["Le Président et le gouvernement","Le Parlement","Les juges","Le peuple"], correct:0},
+  {question:"Que signifie « suffrage universel » ?", answers:["Tous les citoyens votent","Seulement les hommes votent","Seulement les élus votent","Les plus riches votent"], correct:0},
+
+  // Droits et devoirs
+  {question:"Quand a été aboli l’esclavage en France ?", answers:["1848","1789","1918","1945"], correct:0},
+  {question:"Qui a rendu l’école gratuite, laïque et obligatoire ?", answers:["Jules Ferry","Napoléon","Charlemagne","Louis XIV"], correct:0},
+  {question:"En France, est-ce légal d'être marié à plusieurs personnes en même temps ?", answers:["Non","Oui","Seulement pour les étrangers","Seulement en Outre-mer"], correct:0},
+  {question:"Quelle liberté permet de ne pas croire en une religion ?", answers:["Liberté de conscience","Liberté d’expression","Liberté d’aller à l’école","Liberté de vote"], correct:0},
+
+  // Histoire, géographie et culture
+  {question:"En quelle année a débuté la Révolution française ?", answers:["1789","1792","1804","1848"], correct:0},
+  {question:"Qui était Napoléon Ier ?", answers:["Empereur français","Roi d’Angleterre","Président","Un général russe"], correct:0},
+  {question:"Qui a été le premier Président élu sous la Ve République ?", answers:["Charles de Gaulle","François Mitterrand","Valéry Giscard d'Estaing","Jacques Chirac"], correct:0},
+  {question:"Quel fleuve coule en France ?", answers:["La Seine","Le Rhin","Le Danube","La Loire Atlantique"], correct:0},
+  {question:"Quelle est la capitale de la France ?", answers:["Paris","Lyon","Marseille","Toulouse"], correct:0},
+  {question:"Sur quel continent se situe la France métropolitaine ?", answers:["Europe","Afrique","Asie","Amérique"], correct:0},
+
+  // Vivre dans la société française
+  {question:"Quel numéro d'urgence permet d'appeler le SAMU ?", answers:["15","17","18","112"], correct:0},
+  {question:"Quel numéro d'urgence permet d'appeler les pompiers ?", answers:["18","15","17","112"], correct:0},
+  {question:"À quoi sert la carte Vitale ?", answers:["Accéder aux soins et remboursement","Voter","Payer les impôts","Conduire"], correct:0},
+  {question:"Quel est le rôle du médecin traitant ?", answers:["Suivi médical et orientation","Écrire la Constitution","Réaliser des lois","Organiser des élections"], correct:0},
+  {question:"Quel est le rôle de la police ?", answers:["Maintenir l’ordre et protéger les citoyens","Voter","Faire les lois","Organiser l’État"], correct:0}
+  // Tu peux continuer avec toutes les autres questions officielles CSP
+];
+
+
+// Tirer 40 questions uniques aléatoires
+function getRandomQuestions(all, n) {
+  const shuffled = [...all].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, n);
+}
+
+let questions = getRandomQuestions(allQuestions, Math.min(40, allQuestions.length));
+let currentQuestion = 0;
+let score = 0;
+
+function showQuestion() {
+  const q = questions[currentQuestion];
+  document.getElementById('progress').textContent = `Question ${currentQuestion + 1} sur ${questions.length}`;
+  document.getElementById('question').textContent = q.question;
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+  document.getElementById('feedback').textContent = '';
+  q.answers.forEach((answer, index) => {
+    const button = document.createElement('button');
+    button.textContent = answer;
+    button.onclick = () => checkAnswer(index);
+    answersDiv.appendChild(button);
+  });
+}
+
+function checkAnswer(index) {
+  const q = questions[currentQuestion];
+  if(index === q.correct){
+    score++;
+    document.getElementById('feedback').textContent = "Bonne réponse !";
+    document.getElementById('feedback').style.color = "green";
+  } else {
+    document.getElementById('feedback').textContent = `Mauvaise réponse ! La bonne réponse était : ${q.answers[q.correct]}`;
+    document.getElementById('feedback').style.color = "red";
+  }
+  currentQuestion++;
+  setTimeout(()=>{
+    if(currentQuestion < questions.length){
+      showQuestion();
+    } else {
+      document.getElementById('quiz').style.display = 'none';
+      document.getElementById('progress').textContent = '';
+      const percentage = ((score/questions.length)*100).toFixed(1);
+      document.getElementById('score').innerHTML = `Votre score : ${score} / ${questions.length} <br>Pourcentage de réussite : ${percentage}%`;
+    }
+  },1000);
+}
+
+showQuestion();
+</script>
+</body>
+</html>
